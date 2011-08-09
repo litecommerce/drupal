@@ -540,7 +540,7 @@ function _litecommerce_software_install_batch(array $step, &$context) {
 
             ob_end_clean();
 
-            x_install_log($function, array('result' => $result, 'output' => $output));
+            x_install_log($function, array('result' => $result, 'output' => trim($output)));
 
             if (false === $result) {
                 // Print output and break the batch process if function is failed
