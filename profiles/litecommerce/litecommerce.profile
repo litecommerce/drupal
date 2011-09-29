@@ -193,7 +193,7 @@ Also, this package installs <a href="http://www.litecommerce.com/" target="new">
 
 <br /><br />
 
-In order to continue the installation script, you must accept both the license agreements.
+In order to continue the installation script, you must accept both the license agreements and the <a href="http://www.litecommerce.com/privacy-policy.html" target="_blank">Privacy policy</a>.
 
 <br /><br />
 
