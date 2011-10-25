@@ -14,8 +14,8 @@
  * @since     1.0.0
  */
 
-if (file_exists(__DIR__ . '/litecommerce/litecommerce.profile.php')) {
-    include_once __DIR__ . '/litecommerce/litecommerce.profile.php';
+if (file_exists(__DIR__ . '/../litecommerce/litecommerce.profile.php')) {
+    include_once __DIR__ . '/../litecommerce/litecommerce.profile.php';
 
 } else {
     include_once __DIR__ . '/../litecommerce/litecommerce.profile';

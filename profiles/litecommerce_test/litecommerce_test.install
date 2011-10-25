@@ -14,12 +14,7 @@
  * @since     1.0.0
  */
 
-if (file_exists(__DIR__ . '/litecommerce/litecommerce.install')) {
-    include_once __DIR__ . '/litecommerce/litecommerce.install';
-
-} else {
-    include_once __DIR__ . '/../litecommerce/litecommerce.install';
-}
+require_once __DIR__ . '/../litecommerce/litecommerce.install';
 
 
 /**
