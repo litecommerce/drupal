@@ -14,7 +14,13 @@
  * @since     1.0.0
  */
 
-require_once __DIR__ . '/../litecommerce/litecommerce.install';
+if (file_exists(__DIR__ . '/litecommerce/litecommerce.install')) {
+    include_once __DIR__ . '/litecommerce/litecommerce.install';
+
+} else {
+    include_once __DIR__ . '/../litecommerce/litecommerce.install';
+}
+
 
 /**
  * Perform actions to set up the site for this profile.

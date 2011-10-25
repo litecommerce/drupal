@@ -14,7 +14,12 @@
  * @since     1.0.0
  */
 
-require_once __DIR__ . '/../litecommerce/litecommerce.profile';
+if (file_exists(__DIR__ . '/litecommerce/litecommerce.profile.php')) {
+    include_once __DIR__ . '/litecommerce/litecommerce.profile.php';
+
+} else {
+    include_once __DIR__ . '/../litecommerce/litecommerce.profile';
+}
 
 
 /**
