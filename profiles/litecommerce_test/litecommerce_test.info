@@ -1,4 +1,4 @@
-; Module manifest
+; Installation profile manifest
 ;
 ; @category  Litecommerce install profile
 ; @package   Litecommerce install profile
@@ -11,7 +11,7 @@
 name = Ecommerce CMS
 description = Select this profile to enable the Drupal functionality as well as the LiteCommerce functionality and a new Drupal theme supporting LC3 widgets.
 
-files[] = litecommerce.profile
+files[] = litecommerce_test.profile
 
 dependencies[] = block
 dependencies[] = color
