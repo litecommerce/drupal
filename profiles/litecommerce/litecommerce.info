@@ -22,6 +22,7 @@ dependencies[] = dashboard
 dependencies[] = help
 dependencies[] = image
 dependencies[] = jquery_update
+dependencies[] = libraries
 dependencies[] = list
 dependencies[] = menu
 dependencies[] = number

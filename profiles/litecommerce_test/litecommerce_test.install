@@ -1,0 +1,207 @@
+<?php
+// vim: set ts=4 sw=4 sts=4 et ft=php:
+
+/**
+ * @file
+ * Ecommerce CMS installation profile
+ *
+ * @category  Litecommerce install profile
+ * @package   Litecommerce install profile
+ * @author    Creative Development LLC <info@cdev.ru>
+ * @copyright Copyright (c) 2010 Creative Development LLC <info@cdev.ru>. All rights reserved
+ * @license   http://www.gnu.org/licenses/gpl-2.0.html GNU General Public License, version 2
+ * @link      http://www.litecommerce.com/
+ * @since     1.0.0
+ */
+
+require_once __DIR__ . '/../litecommerce/litecommerce.install';
+
+
+/**
+ * Perform actions to set up the site for this profile.
+ *
+ * @hook   install
+ * @return void
+ * @since  1.0.0
+ */
+function litecommerce_test_install() {
+
+    litecommerce_install();
+
+    _litecommerce_test_blocks('lc3_clean');
+}
+
+/**
+ * LiteCommerce blocks installation
+ *
+ * @param string $default_theme Default theme name
+ *
+ * @return void
+ * @since  1.0.0
+ */
+function _litecommerce_test_blocks($default_theme) {
+    $values = array(
+
+        // New arrivals block
+        array(
+            'bid' => 10,
+            'block_custom' => array(
+                'info' => 'New arrivals',
+                'lc_class' => '\\XLite\\Module\\CDev\\ProductAdvisor\\View\\NewArrivals',
+            ),
+            'block_lc_widget_settings' => array(
+                'displayMode' => 'small_thumbnails',
+                'gridColumns' => 3,
+                'iconHeight' => '80',
+                'iconWidth' => '80',
+                'rootId' => '1',
+                'useNode' => '1',
+                'maxItemsToDisplay' => 3,
+                'widgetType' => 'sidebar',
+            ),
+            'block' => array(
+                'weight' => -10,
+                'region' => 'sidebar_first',
+                'title'  => 'New arrivals',
+            ),
+        ),
+
+        // Coming soon block
+        array(
+            'bid' => 11,
+            'block_custom' => array(
+                'info' => 'Coming soon',
+                'lc_class' => '\\XLite\\Module\\CDev\\ProductAdvisor\\View\\ComingSoon',
+            ),
+            'block_lc_widget_settings' => array(
+                'displayMode' => 'small_thumbnails',
+                'gridColumns' => 3,
+                'iconHeight' => '80',
+                'iconWidth' => '80',
+                'rootId' => '1',
+                'useNode' => '1',
+                'maxItemsToDisplay' => 3,
+                'widgetType' => 'sidebar',
+            ),
+            'block' => array(
+                'weight' => -9,
+                'region' => 'sidebar_first',
+                'title'  => 'Coming soon',
+            ),
+        ),
+
+        // Recently viewed block
+        array(
+            'bid' => 12,
+            'block_custom' => array(
+                'info' => 'Recently viewed',
+                'lc_class' => '\\XLite\\Module\\CDev\\ProductAdvisor\\View\\RecentlyViewed',
+            ),
+            'block_lc_widget_settings' => array(
+                'displayMode' => 'text_links',
+                'gridColumns' => 3,
+                'iconHeight' => '80',
+                'iconWidth' => '80',
+                'rootId' => '1',
+                'useNode' => '1',
+                'maxItemsToDisplay' => 3,
+                'widgetType' => 'sidebar',
+            ),
+            'block' => array(
+                'weight' => -8,
+                'region' => 'sidebar_first',
+                'title'  => 'Recently viewed',
+            ),
+        ),
+
+        // Customers who bought this product also bought block
+        array(
+            'bid' => 13,
+            'block_custom' => array(
+                'info' => 'Customers who bought this product also bought',
+                'lc_class' => '\\XLite\\Module\\CDev\\ProductAdvisor\\View\\BoughtBought',
+            ),
+            'block_lc_widget_settings' => array(
+                'displayMode' => 'grid',
+                'gridColumns' => 5,
+                'iconHeight' => '160',
+                'iconWidth' => '160',
+                'showDisplayModeSelector' => 0,
+                'showItemsPerPageSelector' => 0,
+                'showSortBySelector' => 0,
+                'itemsPerPage' => 5,
+                'widgetType' => 'center',
+            ),
+            'block' => array(
+                'weight' => -8,
+                'region' => 'content',
+                'title'  => 'Customers who bought this product also bought',
+            ),
+        ),
+
+        // Customers who viewed this product bought block
+        array(
+            'bid' => 14,
+            'block_custom' => array(
+                'info' => 'Customers who viewed this product bought',
+                'lc_class' => '\\XLite\\Module\\CDev\\ProductAdvisor\\View\\ViewedBought',
+            ),
+            'block_lc_widget_settings' => array(
+                'displayMode' => 'grid',
+                'gridColumns' => 5,
+                'iconHeight' => '160',
+                'iconWidth' => '160',
+                'showDisplayModeSelector' => 0,
+                'showItemsPerPageSelector' => 0,
+                'showSortBySelector' => 0,
+                'itemsPerPage' => 5,
+                'widgetType' => 'center',
+            ),
+            'block' => array(
+                'weight' => -7,
+                'region' => 'content',
+                'title'  => 'Customers who viewed this product bought',
+            ),
+        ),
+
+
+    );
+
+    $block_custom_default_values = array(
+        'body'   => '____FROM_LC____',
+        'format' => 'filtered_html',
+    );
+
+    $block_default_values = array(
+        'module' => 'block',
+        'theme' => $default_theme,
+        'status' => '1',
+        'title' => '',
+        'pages' => '',
+        'cache' => '-1',
+    );
+
+    $query_block_custom = db_insert('block_custom')->fields(array('bid', 'info', 'lc_class', 'body', 'format'));
+    $query_block_lc_widget_settings = db_insert('block_lc_widget_settings')->fields(array('bid', 'name', 'value'));
+    $query_block = db_insert('block')->fields(array('delta', 'module', 'theme', 'status', 'weight', 'region', 'title', 'pages', 'cache'));
+
+    foreach ($values as $record) {
+
+        $bid = array('bid' => $record['bid']);
+        $record_block_custom = $bid + $record['block_custom'] + $block_custom_default_values;
+        $query_block_custom->values($record_block_custom);
+
+        foreach ($record['block_lc_widget_settings'] as $setting_name => $setting_value) {
+            $record_block_lc_widget_settings = $bid + array('name' => $setting_name, 'value' => $setting_value);
+            $query_block_lc_widget_settings->values($record_block_lc_widget_settings);
+        }
+
+        $record_block = array('delta' => $record['bid']) + $record['block'] + $block_default_values;
+        $query_block->values($record_block);
+    }
+
+    $query_block_custom->execute();
+    $query_block_lc_widget_settings->execute();
+    $query_block->execute();
+}
+

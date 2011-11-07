@@ -433,6 +433,10 @@ function litecommerce_setup_form_submit(array $form, array &$form_state) {
     $params['setup_passed'] = TRUE;
 
     variable_set('lc_setup_params', $params);
+
+    if (_litecommerce_include_lc_files()) {
+        x_install_log('Configure LiteCommerce installation', array('params' => $params));
+    }
 }
 
 /**
@@ -540,7 +544,7 @@ function _litecommerce_software_install_batch(array $step, &$context) {
 
             ob_end_clean();
 
-            x_install_log($function, array('result' => $result, 'output' => trim($output)));
+            x_install_log($function, array('result' => $result, 'output' => trim(preg_replace('/(\S) +(\S)/sSU', '\1 \2', $output))));
 
             if (false === $result) {
                 // Print output and break the batch process if function is failed
@@ -594,6 +598,7 @@ function _litecommerce_get_litecommerce_dir() {
 function _litecommerce_software_install_finished($success, $results, $operations) {
 
     if (!$success) {
+        x_install_log('LiteCommerce installation failed', array('results' => $results, 'operations' => $operations));
         drupal_set_message(st('LiteCommerce installation failed.'), 'error');
     }
 }
@@ -618,6 +623,10 @@ function litecommerce_form_install_configure_form_alter(array &$form, array &$fo
     }
     else {
         $form['#submit'] = array('litecommerce_form_install_configure_form_submit');
+    }
+
+    if (_litecommerce_include_lc_files()) {
+        x_install_log('Configure Ecommerce CMS page');
     }
 }
 
@@ -666,6 +675,7 @@ function litecommerce_form_install_configure_form_submit(array &$form, array &$f
     if (!defined('DEV_MODE') && _litecommerce_include_lc_files()) {
         // Finish LC installation: update config options, remove install.php, initialize auth key, send email notification
         doFinishInstallation($params, true);
+        x_install_log('Configure Ecommerce CMS step complete');
     }
 
     // Reset service variables which were used during installation process

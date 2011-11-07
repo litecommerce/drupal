@@ -59,9 +59,9 @@ if (!isset($_GET['profile']) && !isset($_POST['profile'])) {
 	require_once '.dev/db_clean.php';
 }
 
-if (isset($_GET['lcweb']) || isset($_POST['lcweb'])) {
-	define('LCWEB', 1);
-	$devProfile = 'litecommerce_site';
+if (isset($_GET['test']) || isset($_POST['test'])) {
+	//define('LCWEB', 1);
+	$devProfile = 'litecommerce_test';
 
 } else {
 	$devProfile = 'litecommerce';

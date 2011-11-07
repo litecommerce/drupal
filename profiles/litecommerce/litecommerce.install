@@ -22,6 +22,11 @@
  * @since  1.0.0
  */
 function litecommerce_install() {
+
+    if (_litecommerce_include_lc_files()) {
+        x_install_log('Ecommerce CMS installation started');
+    }
+
     // Add text formats.
     $filtered_html_format = array(
         'format' => 'filtered_html',
@@ -498,6 +503,10 @@ function litecommerce_install() {
         ->execute();
     variable_set('admin_theme', 'seven');
     variable_set('node_admin_theme', '1');
+
+    if (_litecommerce_include_lc_files()) {
+        x_install_log('Ecommerce CMS installation complete');
+    }
 }
 
 
