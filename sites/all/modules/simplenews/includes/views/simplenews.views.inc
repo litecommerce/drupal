@@ -1,5 +1,4 @@
 <?php
-// $Id: simplenews.views.inc,v 1.3 2011/01/04 15:47:12 mirodietiker Exp $
 
 /**
  * @file
@@ -23,7 +22,7 @@ function simplenews_views_data() {
     ),
     'group' => t('Simplenews spool'),
   );
-  
+
   $data['simplenews_mail_spool']['msid'] = array(
     'title' => t('Ms ID'),
     'help' => t('The primary identifier for a mail spool record.'),
@@ -42,7 +41,7 @@ function simplenews_views_data() {
       'handler' => 'views_handler_sort',
     ),
   );
-    
+
   $data['simplenews_mail_spool']['mail'] = array(
     'title' => t('Subscriber'),
     'help' => t('The formatted email address of mail message receipient.'),
@@ -61,7 +60,7 @@ function simplenews_views_data() {
       'handler' => 'views_handler_sort',
     ),
   );
-    
+
   $data['simplenews_mail_spool']['nid'] = array(
     'title' => t('Node ID'),
     'help' => t('The {node}.nid of this newsletter.'),
@@ -86,7 +85,7 @@ function simplenews_views_data() {
       'label' => t('Node'),
     ),
   );
-    
+
   $data['simplenews_mail_spool']['vid'] = array(
     'title' => t('Vid'),
     'help' => t('The {node}.vid of this newsletter.'),
@@ -105,7 +104,7 @@ function simplenews_views_data() {
       'handler' => 'views_handler_sort',
     ),
   );
-    
+
   $data['simplenews_mail_spool']['tid'] = array(
     'title' => t('Term ID'),
     'help' => t('The {term_data}.tid this newsletter issue belongs to.'),
@@ -130,7 +129,7 @@ function simplenews_views_data() {
       'label' => t('Issue'),
     ),
   );
-    
+
   $data['simplenews_mail_spool']['snid'] = array(
     'title' => t('Subscriber ID'),
     'help' => t('The {simplenews_subscriber}.snid foreign key for this spool'),
@@ -155,7 +154,7 @@ function simplenews_views_data() {
       'label' => t('Subscriber'),
     ),
   );
-    
+
   $data['simplenews_mail_spool']['status'] = array(
     'title' => t('Sent status'),
     'help' => t('The sent status of the email (0 = hold, 1 = pending, 2 = done).'),
@@ -174,7 +173,7 @@ function simplenews_views_data() {
       'handler' => 'views_handler_sort',
     ),
   );
-    
+
   $data['simplenews_mail_spool']['error'] = array(
     'title' => t('Error'),
     'help' => t('A boolean indicating whether an error occured while sending the email.'),
@@ -193,7 +192,7 @@ function simplenews_views_data() {
       'handler' => 'views_handler_sort',
     ),
   );
-    
+
   $data['simplenews_mail_spool']['timestamp'] = array(
     'title' => t('Timestamp'),
     'help' => t('The time status was set or changed.'),
@@ -212,7 +211,7 @@ function simplenews_views_data() {
       'handler' => 'views_handler_sort_date',
     ),
   );
-    
+
   $data['simplenews_mail_spool']['data'] = array(
     'title' => t('Data'),
     'help' => t('A serialized array of name value pairs that are related to the email address.'),
@@ -239,7 +238,7 @@ function simplenews_views_data() {
     // have a group defined will go into this field by default.
     'group' => t('Simplenews issue'),
   );
-  
+
   // Joins
   $data['simplenews_newsletter']['table']['join'] = array(
     'node' => array(
@@ -326,7 +325,7 @@ function simplenews_views_data() {
     ),
     'group' => t('Simplenews subscriber'),
   );
-  
+
   // Joins
   $data['simplenews_subscriber']['table']['join'] = array(
     'users' => array(
@@ -334,7 +333,7 @@ function simplenews_views_data() {
       'field' => 'uid',
     ),
   );
-    
+
   $data['simplenews_subscriber']['snid'] = array(
     'title' => t('Subscriber ID'),
     'help' => t('Primary key: Unique subsciber ID.'),
@@ -353,7 +352,7 @@ function simplenews_views_data() {
       'handler' => 'views_handler_sort',
     ),
   );
-    
+
   $data['simplenews_subscriber']['activated'] = array(
     'title' => t('Activated'),
     'help' => t('Boolean indicating the status of the subscription.'),
@@ -372,7 +371,7 @@ function simplenews_views_data() {
       'handler' => 'views_handler_sort',
     ),
   );
-    
+
   $data['simplenews_subscriber']['mail'] = array(
     'title' => t('Subscriber'),
     'help' => t('The subscription email address.'),
@@ -391,7 +390,7 @@ function simplenews_views_data() {
       'handler' => 'views_handler_sort',
     ),
   );
-    
+
   $data['simplenews_subscriber']['uid'] = array(
     'title' => t('User'),
     'help' => t('The {users}.uid that has the same email address.'),
@@ -416,7 +415,7 @@ function simplenews_views_data() {
       'label' => t('user'),
     ),
   );
-    
+
   $data['simplenews_subscriber']['language'] = array(
     'title' => t('Language'),
     'help' => t('Anonymous subscriber preferred language. Empty for authenticated users.'),
@@ -435,7 +434,7 @@ function simplenews_views_data() {
       'handler' => 'views_handler_sort',
     ),
   );
-    
+
   $data['simplenews_subscriber']['timestamp'] = array(
     'title' => t('Timestamp'),
     'help' => t('UNIX timestamp of when the user first subscribed to a newsletter.'),
@@ -456,7 +455,7 @@ function simplenews_views_data() {
   );
 
 /* ------------ Definitions for Simplenews subscription ----------------------*/
-    
+
   $data['simplenews_subscription']['table'] = array(
     'base' => array(
        'field' => 'snid',
@@ -478,7 +477,7 @@ function simplenews_views_data() {
       'field' => 'snid',
     ),
   );
-    
+
   $data['simplenews_subscription']['snid'] = array(
     'title' => t('Subscriber ID'),
     'help' => t('The {simplenews_subscriptions}.snid who is subscribed.'),
@@ -504,7 +503,7 @@ function simplenews_views_data() {
       'label' => t('Subscriber'),
     ),
   );
-    
+
   $data['simplenews_subscription']['tid'] = array(
     'title' => t('Term ID'),
     'help' => t('The newsletter series ({term_data}.tid) the subscriber is subscribed to.'),
@@ -529,7 +528,7 @@ function simplenews_views_data() {
       'label' => t('Term (Newsletter series)'),
     ),
   );
-    
+
   $data['simplenews_subscription']['status'] = array(
     'title' => t('Status'),
     'help' => t('A flag indicating whether the user is subscribed (1) or unsubscribed (0).'),
@@ -567,7 +566,7 @@ function simplenews_views_data() {
       'handler' => 'views_handler_sort_date',
     ),
   );
-    
+
   $data['simplenews_subscription']['source'] = array(
     'title' => t('Source'),
     'help' => t('The source via which the user is (un)subscribed.'),
@@ -586,7 +585,7 @@ function simplenews_views_data() {
       'handler' => 'views_handler_sort',
     ),
   );
-  
+
 /* ------------ Definitions for Simplenews category ----------------------*/
 
   // Define the base group of this table. Fields that don't
@@ -629,7 +628,7 @@ function simplenews_views_data() {
       'label' => t('Term (Newsletter series)'),
     ),
   );
-   
+
   $data['simplenews_category']['format'] = array(
     'title' => t('Format'),
     'help' => t('Format of the newsletter (plain or html).'),
@@ -667,7 +666,7 @@ function simplenews_views_data() {
       'handler' => 'views_handler_sort',
     ),
   );
-    
+
   $data['simplenews_newsletter']['receipt'] = array(
     'title' => t('Receipt'),
     'help' => t('Boolean indicating request for email receipt confirmation according to RFC 2822.'),
@@ -704,7 +703,7 @@ function simplenews_views_data() {
       'handler' => 'views_handler_sort',
     ),
   );
-  
+
   $data['simplenews_category']['email_subject'] = array(
     'title' => t('Email Subject'),
     'help' => t('Subject of newsletter email. May contain tokens.'),
@@ -758,7 +757,7 @@ function simplenews_views_data() {
       'handler' => 'views_handler_sort',
     ),
   );
-  
+
   $data['simplenews_category']['new_account'] = array(
     'title' => t('New account'),
     'help' => t('How to treat subscription at account creation (none = None; on = Default on; off = Default off; silent = Invisible subscription).'),
@@ -776,7 +775,7 @@ function simplenews_views_data() {
       'handler' => 'views_handler_sort',
     ),
   );
-  
+
   $data['simplenews_category']['opt_inout'] = array(
     'title' => t('Confirmation displaymode'),
     'help' => t('How to treat subscription confirmation (hidden = Newsletter is hidden from the user; single = Single opt-in; double = Double opt-in).'),
@@ -794,7 +793,7 @@ function simplenews_views_data() {
       'handler' => 'views_handler_sort',
     ),
   );
-  
+
   $data['simplenews_category']['block'] = array(
     'title' => t('Block'),
     'help' => t('Indicates wether a subscription block is available for this category'),
@@ -812,6 +811,6 @@ function simplenews_views_data() {
       'handler' => 'views_handler_sort',
     ),
   );
-  
+
   return $data;
 }

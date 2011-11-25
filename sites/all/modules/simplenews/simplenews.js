@@ -1,4 +1,3 @@
-//$Id: simplenews.js,v 1.6 2011/01/18 09:51:59 mirodietiker Exp $
 (function ($) {
 
 /**

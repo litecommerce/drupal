@@ -1,5 +1,4 @@
 <?php
-// $Id: simplenews_handler_field_category_new_account.inc,v 1.1 2011/01/04 15:47:12 mirodietiker Exp $
 
 /**
  * @file

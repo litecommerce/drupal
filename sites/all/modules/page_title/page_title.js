@@ -1,4 +1,3 @@
-// $Id: page_title.js,v 1.2.4.2 2010/11/01 23:37:52 njt1982 Exp $
 
 (function ($) {
 

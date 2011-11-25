@@ -1,5 +1,4 @@
 <?php
-// $Id: page_title.tokens.inc,v 1.1.2.1 2010/11/01 21:25:40 njt1982 Exp $
 
 /**
  * @file

@@ -1,4 +1,3 @@
-$Id: README.txt,v 1.15 2010/12/20 08:37:36 simongeorges Exp $
 
 DESCRIPTION
 -----------
