@@ -1,5 +1,4 @@
 <?php
-// $Id: context-task-handler.inc,v 1.35 2011/01/05 20:06:57 merlinofchaos Exp $
 
 /**
  * @file
@@ -44,6 +43,8 @@ function ctools_context_handler_render($task, $subtask, $contexts, $args) {
   if ($id) {
     return ctools_context_handler_render_handler($task, $subtask, $handlers[$id], $contexts, $args);
   }
+
+  return FALSE;
 }
 
 /**
@@ -159,32 +160,9 @@ function ctools_context_handler_render_handler($task, $subtask, $handler, $conte
     }
   }
 
-  foreach (ctools_context_handler_get_task_arguments($task, $subtask) as $id => $argument) {
-    $plugin = ctools_get_argument($argument['name']);
-    $cid = ctools_context_id($argument, 'argument');
-    if (!empty($contexts[$cid]) && ($function = ctools_plugin_get_function($plugin, 'breadcrumb'))) {
-      $function($argument['settings'], $contexts[$cid]);
-    }
-  }
-
-  if (isset($info['title'])) {
-    drupal_set_title($info['title']);
-  }
-
-  // Only directly output if $page was set to true.
-  if (!empty($info['no_blocks'])) {
-    ctools_set_no_blocks(FALSE);
-  }
-  return $info['content'];
-}
-
-/**
- * Called to execute actions that should happen before a handler is rendered.
- */
-function ctools_context_handler_pre_render($handler, $contexts, $args) {
   $plugin = page_manager_get_task_handler($handler->handler);
 
-  if (user_access('administer page manager') && isset($handler->task)) {
+  if (module_exists('contextual') && user_access('access contextual links') && user_access('administer page manager') && isset($handler->task)) {
     // Provide a tab to edit this context:
     ctools_include('menu');
     $task = page_manager_get_task($handler->task);
@@ -200,13 +178,58 @@ function ctools_context_handler_pre_render($handler, $contexts, $args) {
       }
     }
 
-    ctools_menu_add_tab(array(
-      'title' => $title,
-      'href' => page_manager_edit_url(page_manager_make_task_name($handler->task, $handler->subtask), $trail),
-      'type' => MENU_LOCAL_ACTION
-    ));
+    $build = array(
+      '#theme_wrappers' => array('container'),
+      '#attributes' => array('class' => array('contextual-links-region')),
+    );
+
+    if (!is_array($info['content'])) {
+      $build['content']['#markup'] = $info['content'];
+    }
+    else {
+      $build['content'] = $info['content'];
+    }
+
+    $path = page_manager_edit_url(page_manager_make_task_name($handler->task, $handler->subtask), $trail);
+    $build['contextual_links'] = array(
+      '#prefix' => '<div class="contextual-links-wrapper">',
+      '#suffix' => '</div>',
+      '#theme' => 'links__contextual',
+      '#links' => array(array(
+        'href' => $path,
+        'title' => $title,
+      )),
+      '#attributes' => array('class' => array('contextual-links')),
+      '#attached' => array(
+        'library' => array(array('contextual', 'contextual-links')),
+      ),
+    );
+    $info['content'] = drupal_render($build);
   }
+
+  foreach (ctools_context_handler_get_task_arguments($task, $subtask) as $id => $argument) {
+    $plugin = ctools_get_argument($argument['name']);
+    $cid = ctools_context_id($argument, 'argument');
+    if (!empty($contexts[$cid]) && ($function = ctools_plugin_get_function($plugin, 'breadcrumb'))) {
+      $function($argument['settings'], $contexts[$cid]);
+    }
+  }
+
+  if (isset($info['title'])) {
+    drupal_set_title($info['title'], PASS_THROUGH);
+  }
+
+  // Only directly output if $page was set to true.
+  if (!empty($info['no_blocks'])) {
+    ctools_set_no_blocks(FALSE);
+  }
+  return $info['content'];
 }
+
+/**
+ * Called to execute actions that should happen before a handler is rendered.
+ */
+function ctools_context_handler_pre_render($handler, $contexts, $args) { }
 
 /**
  * Compare arguments to contexts for selection purposes.

@@ -1,5 +1,4 @@
 <?php
-// $Id: terms_from_node.inc,v 1.2 2010/10/11 22:18:23 sdboyer Exp $
 
 /**
  * @file
@@ -30,18 +29,25 @@ function ctools_terms_from_node_context($context, $conf) {
   }
 
   // Collect all terms for the chosen vocabulary and concatenate them.
-  if (isset($context->data->taxonomy)) {
-    $terms = array();
-    foreach ($context->data->taxonomy as $term) {
-      if (in_array($term->vid, $conf['vid'])) {
-        $terms[] = $term->tid;
+  $node = $context->data;
+  $terms = array();
+  
+  $fields = field_info_instances('node', $node->type);
+  foreach ($fields as $name => $info) {
+    $field_info = field_info_field($name);
+    if ($field_info['type'] == 'taxonomy_term_reference') {
+      $items = field_get_items('node', $node, $name);
+      if (is_array($items)) {
+        foreach ($items as $item) {
+		  $terms[] = $item['tid'];
+        }
       }
     }
-
-    if (!empty($terms)) {
-      $all_terms = ctools_break_phrase(implode($conf['concatenator'], $terms));
-      return ctools_context_create('terms', $all_terms);
-    }
+  }
+  
+  if (!empty($terms)) {
+    $all_terms = ctools_break_phrase(implode($conf['concatenator'], $terms));
+    return ctools_context_create('terms', $all_terms);
   }
 }
 
