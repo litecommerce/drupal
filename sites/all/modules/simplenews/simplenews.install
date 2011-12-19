@@ -1,5 +1,4 @@
 <?php
-// $Id: simplenews.install,v 1.64 2011/01/18 09:10:13 mirodietiker Exp $
 
 /**
  * @file
@@ -132,8 +131,14 @@ function simplenews_schema() {
     ),
     'primary key' => array('nid'),
     'foreign keys' => array(
-      'nid' => array('node' => 'nid'),
-      'vid' => array('node' => 'vid'),
+      'nid' => array(
+        'table' => 'node',
+        'columns' => array('nid' => 'nid'),
+      ),
+      'vid' => array(
+        'table' => 'node',
+        'columns' => array('vid' => 'vid'),
+      ),
     ),
   );
 
@@ -186,7 +191,10 @@ function simplenews_schema() {
       'uid' => array('uid'),
     ),
     'foreign keys' => array(
-      'uid' => array('users' => 'uid'),
+      'uid' => array(
+        'table' => 'users',
+        'columns' => array('uid' => 'uid'),
+      ),
     ),
   );
 
@@ -229,10 +237,16 @@ function simplenews_schema() {
     ),
     'primary key' => array('snid', 'tid'),
     'foreign keys' => array(
-      'snid' => array('simplenews_subscriber' => 'snid'),
-      'tid' => array('simplenews_category' => 'tid'),
+      'snid' => array(
+        'table' => 'simplenews_subscriber',
+        'columns' => array('snid' => 'snid'),
+      ),
+      'tid' => array(
+        'table' => 'simplenews_category',
+        'columns' => array('tid' => 'tid'),
+      )
     ),
-    // TODO add foreign keys to other tables too?
+    // @todo add foreign keys to other tables too?
   );
 
   $schema['simplenews_mail_spool'] = array(
@@ -301,20 +315,36 @@ function simplenews_schema() {
       'snid' => array(
         'description' => 'Foreign key for subscriber table ({simplenews_subscriptions}.snid)',
         'type' => 'int',
-        'unsigned' => TRUE,
         'not null' => TRUE,
-        ),
+        'default' => 0,
+      ),
     ),
     'primary key' => array('msid'),
     'indexes' => array(
       'tid' => array('tid'),
       'status' => array('status'),
+      'snid_tid' => array('snid', 'tid'),
     ),
     'foreign keys' => array(
-      'nid' => array('node' => 'nid'),
-      'vid' => array('node' => 'vid'),
-      'tid' => array('simplenews_category' => 'tid'),
-      'snid' => array('simplenews_subscription' => 'snid'),
+      'nid' => array(
+        'table' => 'node',
+        'columns' => array('nid' => 'nid'),
+      ),
+      'vid' => array(
+        'table' => 'node',
+        'columns' => array('vid' => 'vid'),
+      ),
+      'tid' => array(
+        'table' => 'simplenews_category',
+        'columns' => array('tid'),
+      ),
+      'snid_tid' => array(
+        'table' => 'simplenews_subscription',
+        'columns' => array(
+          'snid' => 'snid',
+          'tid' => 'tid',
+        ),
+      ),
     ),
   );
   return $schema;
@@ -326,17 +356,9 @@ function simplenews_schema() {
 function simplenews_install() {
   _simplenews_init_simplenews_vocabulary();
   _simplenews_init_simplenews_category();
+
   // add nodetype with newsletter vocabulary
   _simplenews_install_nodetype();
-  
-  if (module_exists('help')) {
-    drupal_set_message(t('Simplenews installation instructions are available on the <a href="!simplenews_help">Simplenews help page</a>.', array('!simplenews_help' => url('admin/help/simplenews'))));
-  }
-  else {
-    drupal_set_message(t('Simplenews was successfully installed.'));
-  }
-  // TODO is it still possible/useful to detect faulty installation
-  // drupal_set_message(t('The installation of Simplenews was not successful.'), 'error');
 }
 
 /**
@@ -413,7 +435,7 @@ function _simplenews_init_simplenews_category() {
       if (!isset($categories[$term->tid])) {
         $category = new stdClass();
         $category->tid = $term->tid;
-        // TODO use a function for category default values
+        // @todo use a function for category default values
         $category->from_name      = variable_get('site_name', 'Drupal');
         $category->email_subject  ='[[simplenews-category:name]] [node:title]';
         $category->from_address   = variable_get('site_mail', ini_get('sendmail_from'));
@@ -762,10 +784,10 @@ function _simplenews_convert_tokens_in_variable($variables) {
   if (!is_array($variables)) {
     $variables = array($variables);
   }
-  
+
   $old = array('[site-name]', '[user-mail]', '[site-url]/user', '[site-url]', '[simplenews-subscribe-url]', '[simplenews-unsubscribe-url]', '[simplenews-newsletter-url]', '[simplenews-newsletters-name]', '[simplenews-newsletters-url]', '[simplenews-receiver-mail]');
   $new = array('[site:name]', '[user:mail]', '[site:login-url]', '[site:url]', '[simplenews-subscriber:subscribe-url]', '[simplenews-subscriber:unsubscribe-url]', '[simplenews-newsletter:url]', '[simplenews-list:name]', '[simplenews-list:url]', '[simplenews-subscriber:mail]');
-  
+
   foreach ($variables as $variable) {
     if ($text = variable_get($variable, FALSE)) {
       $text = str_replace($old, $new, $text);
@@ -787,10 +809,10 @@ function _simplenews_convert_tokens_in_variable($variables) {
  * Delete deprecated simplenews variables.
  */
 function simplenews_update_7000() {
-  // TODO Test schema update !!
+  // @todo Test schema update !!
   // See: http://api.drupal.org/api/function/db_change_field/7
-  // TODO Test data update !!
-  
+  // @todo Test data update !!
+
   // Convert tokens in variables to D7 format.
   $variables = array('simplenews_confirm_subscribe_subject', 'simplenews_confirm_subscribe_unsubscribed', 'simplenews_confirm_subscribe_subscribed', 'simplenews_confirm_unsubscribe_subscribed', 'simplenews_confirm_unsubscribe_unsubscribed');
   _simplenews_convert_tokens_in_variable($variables);
@@ -884,11 +906,11 @@ function simplenews_update_7000() {
 
   // Migrate Newsletter taxonomy data to Newsletter categories.
   $terms = taxonomy_get_tree(variable_get('simplenews_vid', ''));
-  // TODO Check if simplenews blocks are still active after core update.
+  // @todo Check if simplenews blocks are still active after core update.
   //      If not, there is no purpose in migrating the block status ('block' => 0).
   $blocks = _simplenews_get_blocks();
   foreach ($terms as $term) {
-    _simplenews_convert_tokens_in_variable('simplenews_email_subject_'. $term->tid);
+    _simplenews_convert_tokens_in_variable('simplenews_email_subject_' . $term->tid);
 
     db_insert('simplenews_category')
       ->fields(array(
@@ -896,12 +918,12 @@ function simplenews_update_7000() {
         'format' => 'plain',
         'priority' => '0',
         'receipt' => '0',
-        'from_name' => variable_get('simplenews_from_name_'. $term->tid, variable_get('simplenews_from_name', variable_get('site_name', 'Drupal'))),
-        'email_subject' => variable_get('simplenews_email_subject_'. $term->tid, '[[simplenews-newsletters-name]] [title-raw]'),
-        'from_address' => variable_get('simplenews_from_address_'. $term->tid, variable_get('simplenews_from_address', variable_get('site_mail', ini_get('sendmail_from')))),
-        'hyperlinks' => variable_get('simplenews_hyperlinks_'. $term->tid, 1),
-        'new_account' => variable_get('simplenews_new_account_'. $term->tid, 'none'),
-        'opt_inout' => variable_get('simplenews_opt_inout_'. $term->tid, 'double'),
+        'from_name' => variable_get('simplenews_from_name_' . $term->tid, variable_get('simplenews_from_name', variable_get('site_name', 'Drupal'))),
+        'email_subject' => variable_get('simplenews_email_subject_' . $term->tid, '[[simplenews-newsletters-name]] [title-raw]'),
+        'from_address' => variable_get('simplenews_from_address_' . $term->tid, variable_get('simplenews_from_address', variable_get('site_mail', ini_get('sendmail_from')))),
+        'hyperlinks' => variable_get('simplenews_hyperlinks_' . $term->tid, 1),
+        'new_account' => variable_get('simplenews_new_account_' . $term->tid, 'none'),
+        'opt_inout' => variable_get('simplenews_opt_inout_' . $term->tid, 'double'),
         'block' => isset($blocks[$term->tid]) ? 1 : 0,
         ))
       ->execute();
@@ -927,7 +949,7 @@ function simplenews_update_7000() {
   // Change field {simplenews_subscription}.tid description
   db_drop_primary_key('simplenews_snid_tid');
   db_rename_table('simplenews_snid_tid', 'simplenews_subscription');
-  
+
   // Add {simplenews_mail_spool}.data to store subscriber data.
   db_add_field('simplenews_mail_spool', 'data', array(
     'type' => 'text',
@@ -949,14 +971,21 @@ function simplenews_update_7000() {
   // Delete deprecated variables.
   $terms = taxonomy_get_tree(variable_get('simplenews_vid', ''));
   foreach ($terms as $term) {
-    variable_del('simplenews_from_name_'. $term->tid);
-    variable_del('simplenews_email_subject_'. $term->tid);
-    variable_del('simplenews_from_address_'. $term->tid);
-    variable_del('simplenews_hyperlinks_'. $term->tid);
-    variable_del('simplenews_new_account_'. $term->tid);
-    variable_del('simplenews_opt_inout_'. $term->tid);
+    variable_del('simplenews_from_name_' . $term->tid);
+    variable_del('simplenews_email_subject_' . $term->tid);
+    variable_del('simplenews_from_address_' . $term->tid);
+    variable_del('simplenews_hyperlinks_' . $term->tid);
+    variable_del('simplenews_new_account_' . $term->tid);
+    variable_del('simplenews_opt_inout_' . $term->tid);
   }
-  
-  // TODO Add return text about checking of Newsletter Category settings.
-  // TODO Add return text about Block checkboxes
+
+  // @todo Add return text about checking of Newsletter Category settings.
+  // @todo Add return text about Block checkboxes
+}
+
+/**
+ * Create key snid_tid on simplenews_mail_spool table.
+ */
+function simplenews_update_7001() {
+  db_add_index('simplenews_mail_spool', 'snid_tid', array('snid', 'tid'));
 }

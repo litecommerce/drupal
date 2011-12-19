@@ -1,5 +1,4 @@
 <?php
-// $Id: simplenews_handler_field_newsletter_priority.inc,v 1.2 2011/01/04 16:07:16 mirodietiker Exp $
 
 /**
  * @file

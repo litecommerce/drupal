@@ -1,5 +1,4 @@
 <?php
-// $Id: simplenews_handler_filter_newsletter_status.inc,v 1.2 2011/01/04 15:47:12 mirodietiker Exp $
 
 /**
  * @file

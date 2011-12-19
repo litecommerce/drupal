@@ -1,11 +1,11 @@
 <?php
-// $Id: simplenews_action.module,v 1.19 2011/01/04 16:07:16 mirodietiker Exp $
 
 /**
  * @file simplenews_action.module
  * Provide actions for simplenews.
  *
  * @ingroup simplenews
+ *
  * @todo Check and rework actions/trigger code for trigger API overhaul: http://drupal.org/node/224333#trigger_overhaul
  */
 
@@ -98,7 +98,7 @@ function simplenews_action_send_newsletter(&$object, $context = array()) {
  * Implementation of a configurable Drupal action. Send newsletter
  */
 function simplenews_action_send_newsletter_form($context) {
-  //TODO improve usability by adding a pre-selection of newsletters before the newsletter issue selection
+  // @todo improve usability by adding a pre-selection of newsletters before the newsletter issue selection
   //     Requires AHAH function to select newsletters issues based on selected newsletter
   //
   //  if (!isset($context['newsletter'])) {
@@ -119,10 +119,11 @@ function simplenews_action_send_newsletter_form($context) {
   //    '#default_value' => $context['newsletter'],
   //    '#description' => t('The newsletter series'),
   //  );
-  $newsletters = simplenews_newsletter_load_multiple(array(), array('scid' => array_keys($categories)));
+  $newsletters = simplenews_newsletter_load_multiple(array(), array('t.tid' => array_keys($categories)));
   $newsletter_nodes = array();
   foreach ($newsletters as $newsletter) {
-    $newsletter_nodes[$newsletter->nid] = $newsletter->title;
+    $issue = node_load($newsletter->nid);
+    $newsletter_nodes[$newsletter->nid] = $issue->title;
   }
   $form['newsletter_issue'] = array(
     '#title' => t('Newsletter issue'),
@@ -214,6 +215,7 @@ function simplenews_action_subscribe_user_form($context) {
     '#title' => t('Mailing list'),
     '#type' => 'select',
     '#options' => $options,
+    '#default_value' => isset($context['tid']) ? $context['tid'] : key($options),
     '#description' => t('The mailing list the user will be subscribed to.'),
   );
   return $form;
@@ -240,8 +242,9 @@ function simplenews_action_subscribe_user_submit($form, $form_state) {
  *    $context['slid']    Mailing list id
  *    $context['name']    List name
  *
- *   @see simplenews_action_unsubscribe_user_form()
- *   @see simplenews_action_unsubscribe_user_submit()
+ * @see simplenews_action_unsubscribe_user_form()
+ * @see simplenews_action_unsubscribe_user_submit()
+ *
  * @todo Replace time(): http://drupal.org/node/224333#time
  */
 function simplenews_action_unsubscribe_user(&$object, $context = array()) {
@@ -249,7 +252,7 @@ function simplenews_action_unsubscribe_user(&$object, $context = array()) {
     if (isset($context['slid'])) {
       // This action is only called in the context of user. User data is in $context.
       $account = $context['account'];
-      //TODO: Unsubscribing should be done by simplenews_unsubscribe_user but simplenews_get_user_subscription fails because the user is already removed
+      // @todo Unsubscribing should be done by simplenews_unsubscribe_user but simplenews_get_user_subscription fails because the user is already removed
       $subscriber = reset(simplenews_subscriber_load_multiple(array(), array('mail' => $account->mail)));
       $data = array(
         'status' => SIMPLENEWS_SUBSCRIPTION_STATUS_UNSUBSCRIBED,
@@ -280,6 +283,7 @@ function simplenews_action_unsubscribe_user_form($context) {
     '#title' => t('Mailing list'),
     '#type' => 'select',
     '#options' => $options,
+    '#default_value' => isset($context['tid']) ? $context['tid'] : key($options),
     '#description' => t('The mailing list the user will be unsubscribed from.'),
   );
   return $form;

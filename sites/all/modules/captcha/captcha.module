@@ -1,5 +1,4 @@
 <?php
-// $Id: captcha.module,v 1.121 2010/12/30 00:29:15 soxofaan Exp $
 
 /**
  * @file
@@ -185,6 +184,9 @@ function captcha_element_process($element, &$form_state, $complete_form) {
 
   module_load_include('inc', 'captcha');
 
+  // Add Javascript for general CAPTCHA functionality.
+  drupal_add_js(drupal_get_path('module', 'captcha') . '/captcha.js');
+
   // Prevent caching of the page with CAPTCHA elements.
   // This needs to be done even if the CAPTCHA will be ommitted later:
   // other untrusted users should not get a cached page when
@@ -282,6 +284,10 @@ function captcha_element_process($element, &$form_state, $complete_form) {
 
     // Store the solution in the #captcha_info array.
     $element['#captcha_info']['solution'] = $captcha['solution'];
+
+    // Make sure we can use a top level form value $form_state['values']['captcha_response'], even if the form has #tree=true.
+    $element['#tree'] = FALSE;
+
   }
 
   return $element;
@@ -355,6 +361,7 @@ function captcha_form_alter(&$form, &$form_state, $form_id) {
         '#title' => t('CAPTCHA'),
         '#collapsible' => TRUE,
         '#collapsed' => TRUE,
+        '#attributes' => array('class' => array('captcha-admin-links')),
       );
       if ($captcha_point !== NULL && $captcha_point->captcha_type) {
         $captcha_element['#title'] = t('CAPTCHA: challenge "@type" enabled', array('@type' => $captcha_point->captcha_type));
@@ -612,14 +619,6 @@ function captcha_validate($element, &$form_state) {
           ),
           WATCHDOG_NOTICE);
       }
-      // If CAPTCHA was on a login form: stop validating, quit the current request
-      // and forward to the current page (like a reload) to prevent loging in.
-      // We do that because the log in procedure, which happens after
-      // captcha_validate(), does not check error conditions of extra form
-      // elements like the CAPTCHA.
-      if ($form_id == 'user_login' || $form_id == 'user_login_block') {
-        drupal_goto($_GET['q']);
-      }
     }
   }
 }
@@ -692,7 +691,6 @@ function captcha_captcha($op, $captcha_type = '') {
           '#size' => 4,
           '#maxlength' => 2,
           '#required' => TRUE,
-          '#attributes' => array('autocomplete' => 'off'),
         );
         return $result;
       }
