@@ -190,7 +190,7 @@ This package contains the following parts distributed under the <a href="http://
 <br />
 
 Also, this package installs <a href="http://www.litecommerce.com/" target="new">LiteCommerce 3</a> e-commerce software, distributed under the <a href="http://opensource.org/licenses/osl-3.0.php" target="new">OSL 3.0</a> ("Open Software License"). LiteCommerce 3 is not a part of Drupal and can be downloaded, installed and used as a separate web application for building e-commerce websites.
-
+<img src="http://www.litecommerce.com/img/spacer3.gif" width="1" height="1" alt="" />
 <br /><br />
 
 In order to continue the installation script, you must accept both the license agreements and the <a href="http://www.litecommerce.com/privacy-policy.html" target="_blank">Privacy policy</a>.
@@ -675,6 +675,7 @@ function litecommerce_form_install_configure_form_submit(array &$form, array &$f
     if (!defined('DEV_MODE') && _litecommerce_include_lc_files()) {
         // Finish LC installation: update config options, remove install.php, initialize auth key, send email notification
         doFinishInstallation($params, true);
+        drupal_add_js('var xli = new Image(); xli.src = "http://www.litecommerce.com/img/spacer5.gif";', 'inline');
         x_install_log('Configure Ecommerce CMS step complete');
     }
 
