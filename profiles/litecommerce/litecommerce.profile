@@ -1019,7 +1019,7 @@ function _litecommerce_get_setup_params() {
         if (empty($params) && !empty($db_params)) {
             $params = $db_params;
 
-            $url = parse_url(LCConnector_Install::getDrupalBaseURL() . '/modules/lc_connector/litecommerce');
+            $url = parse_url(LCConnector_Install::getDrupalBaseURL() . '/litecommerce');
             $params['xlite_http_host'] = $url['host'] . (empty($url['port']) ? '' : (':' . $url['port']));
             $params['xlite_web_dir'] = $url['path'];
         }
