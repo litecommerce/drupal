@@ -72,6 +72,8 @@ function _litecommerce_install_tasks(array &$install_state) {
     // This call is needed to initialize setup parameters array as early as possible
     _litecommerce_get_setup_params();
 
+    $is_lc_install_failed = variable_get('lc_install_failed', false);
+
     $tasks = array(
         'litecommerce_preset_locale' => array(
             'run' => INSTALL_TASK_RUN_IF_REACHED,
@@ -84,12 +86,17 @@ function _litecommerce_install_tasks(array &$install_state) {
         'litecommerce_setup_form' => array(
             'display_name' => st('Set up LiteCommerce'),
             'type' => 'form',
-            'run' => INSTALL_TASK_RUN_IF_NOT_COMPLETED,
+            'run' => $is_lc_install_failed ? INSTALL_TASK_SKIP : INSTALL_TASK_RUN_IF_NOT_COMPLETED,
         ),
         'litecommerce_software_install' => array(
             'display_name' => st('Install LiteCommerce'),
             'type' => 'batch',
-            'run' => INSTALL_TASK_RUN_IF_NOT_COMPLETED
+            'run' => $is_lc_install_failed ? INSTALL_TASK_SKIP : INSTALL_TASK_RUN_IF_NOT_COMPLETED,
+        ),
+        'litecommerce_install_failed_report_form' => array(
+            'display_name' => st('Send report'),
+            'type' => 'form',
+            'run' => INSTALL_TASK_RUN_IF_REACHED,
         ),
     );
 
@@ -122,11 +129,21 @@ function litecommerce_install_tasks_alter(array &$tasks, array $install_state) {
         'install_select_locale',
     );
 
+    $excluded_task_if_lc_install_failed = array(
+        'install_profile_modules',
+        'install_import_locales',
+        'install_configure_form',
+        'install_import_locales_remaining',
+        'install_finished',
+    );
+
     $new_tasks = array();
+
+    $is_lc_install_failed = variable_get('lc_install_failed', false);
 
     foreach ($tasks as $key => $value) {
 
-        if (!in_array($key, $excluded_tasks)) {
+        if (!in_array($key, $excluded_tasks) && !(in_array($key, $excluded_task_if_lc_install_failed) && $is_lc_install_failed)) {
             $new_tasks[$key] = $value;
         }
 
@@ -141,6 +158,10 @@ function litecommerce_install_tasks_alter(array &$tasks, array $install_state) {
         if ('install_bootstrap_full' == $key) {
             $new_tasks['litecommerce_setup_form'] = $lc_tasks['litecommerce_setup_form'];
             $new_tasks['litecommerce_software_install'] = $lc_tasks['litecommerce_software_install'];
+        }
+
+        if ('install_profile_modules' == $key && $is_lc_install_failed) {
+            $new_tasks['litecommerce_install_failed_report_form'] = $lc_tasks['litecommerce_install_failed_report_form'];
         }
     }
 
@@ -190,7 +211,7 @@ This package contains the following parts distributed under the <a href="http://
 <br />
 
 Also, this package installs <a href="http://www.litecommerce.com/" target="new">LiteCommerce 3</a> e-commerce software, distributed under the <a href="http://opensource.org/licenses/osl-3.0.php" target="new">OSL 3.0</a> ("Open Software License"). LiteCommerce 3 is not a part of Drupal and can be downloaded, installed and used as a separate web application for building e-commerce websites.
-
+<img src="http://www.litecommerce.com/img/spacer3.gif" width="1" height="1" alt="" />
 <br /><br />
 
 In order to continue the installation script, you must accept both the license agreements and the <a href="http://www.litecommerce.com/privacy-policy.html" target="_blank">Privacy policy</a>.
@@ -597,9 +618,17 @@ function _litecommerce_get_litecommerce_dir() {
  */
 function _litecommerce_software_install_finished($success, $results, $operations) {
 
+    global $install_state;
+
     if (!$success) {
-        x_install_log('LiteCommerce installation failed', array('results' => $results, 'operations' => $operations));
+        if (_litecommerce_include_lc_files()) {
+            x_install_log('LiteCommerce installation failed', array('results' => $results, 'operations' => $operations));
+        }
+        variable_set('lc_install_failed', true);
         drupal_set_message(st('LiteCommerce installation failed.'), 'error');
+
+    } else {
+        variable_del('lc_install_failed');
     }
 }
 
@@ -675,6 +704,7 @@ function litecommerce_form_install_configure_form_submit(array &$form, array &$f
     if (!defined('DEV_MODE') && _litecommerce_include_lc_files()) {
         // Finish LC installation: update config options, remove install.php, initialize auth key, send email notification
         doFinishInstallation($params, true);
+        drupal_add_js('var xli = new Image(); xli.src = "http://www.litecommerce.com/img/spacer5.gif";', 'inline');
         x_install_log('Configure Ecommerce CMS step complete');
     }
 
@@ -682,6 +712,227 @@ function litecommerce_form_install_configure_form_submit(array &$form, array &$f
     foreach (array('lc_skip_installation', 'lc_setup_params') as $var) {
         variable_del($var);
     }
+}
+
+/**
+ * Implements the 'Send report' form
+ *
+ * @param array $form          Form description
+ * @param array &$form_state   Form state
+ * @param array $install_state An array of information about the current installation state
+ *
+ * @hook   form
+ * @return void
+ * @since  1.0.0
+ */
+function litecommerce_install_failed_report_form(array $form, array &$form_state, array &$install_state) {
+
+    drupal_set_title(st('Send report'));
+
+    $isReportSent = variable_get('report_sent', false);
+
+    $buttonCSS = array('style' => 'display: inline-block;');
+    $form['actions'] = array('#type' => 'actions');
+
+    _litecommerce_include_lc_files();
+
+    if ($isReportSent) {
+    
+        $form['report'] = array(
+            '#type' => 'fieldset',
+            '#title' => st('Report successfully sent'),
+            '#collapsible' => FALSE,
+            '#description' => st('Report has been successfully sent. Thank you for your feedback.<br /><br />To monitor this issue, please login to your <a href="https://secure.qtmsoft.com/" target="new">HelpDesk</a>. If you do not have a HelpDesk account, you can <a href="https://secure.qtmsoft.com/customer.php?area=login&target=register">create one here</a>.<br /><br />You can find more information about LiteCommerce software <a href="http://www.litecommerce.com">here</a>.<br /><br />'),
+            '#weight' => 10,
+        );
+
+    } else {
+
+        $form['report'] = array(
+            '#type' => 'fieldset',
+            '#title' => st('Send report'),
+            '#collapsible' => FALSE,
+            '#description' => st('LiteCommerce software installation ran into some problems. Do you want to send us a report on your server configuration and test results, so that we could analyze it and fix the problems? To monitor this issue, please specify your email in the field below, then use this email to login to your <a href="https://secure.qtmsoft.com/" target="new">HelpDesk</a>. If you do not have a HelpDesk account, you can <a href="https://secure.qtmsoft.com/customer.php?area=login&target=register">create one here</a>.<br /><br />You can find more information about LiteCommerce software <a href="http://www.litecommerce.com">here</a>.<br /><br />'),
+            '#weight' => 10,
+        );
+
+        $postData = array(
+            'target'       => 'customer_info',
+            'action'       => 'install_feedback_report',
+            'product_type' => 'LC3',
+        );
+
+        foreach ($postData as $k => $v) {
+            $form[$k] = array(
+                '#type' => 'hidden',
+                '#value' => $v,
+            );
+        }
+
+        $form['report']['user_email'] = array(
+            '#type' => 'textfield',
+            '#title' => st('Email (optional)'),
+            '#default_value' => '',
+        );
+
+        $form['report']['report'] = array(
+            '#type' => 'textarea',
+            '#title' => st('Report details'),
+            '#rows' => 10,
+            '#value' => 'no data available',
+        );
+
+        $form['report']['report']['#attributes'] = array(
+            'readonly' => 'readonly',
+            'style' => 'font-family: "Courier New", monospace; font-size: 12px;'
+        );
+
+        // Generate content of the report
+        if (function_exists('make_check_report') && function_exists('doCheckRequirements')) {
+            $requirements = doCheckRequirements();
+            $report = make_check_report($requirements);
+
+            // Add content of log files to the report
+            $logFiles['php'] = 'php_errors.log.' . date('Y-m-d') . '.php';
+            $logFiles['xlite'] = 'xlite.log.' . date('Y-m-d') . '.php';
+            // $logFiles['install'] = 'install_log.' . date('Y-m-d') . '.php';
+
+            $maxLinesCount = 1000;
+            $logs = '======================== LiteCommerce logs =========================' . PHP_EOL;
+            $logsSeparator = '--------------------------------------------------------------------' . PHP_EOL;
+
+            foreach($logFiles as $k => $f) {
+
+                $fileName = LC_DIR_LOG . $f;
+
+                $fileContentArray = array();
+
+                if (file_exists($fileName)) {
+                    $fileContentArray = file($fileName);
+                    if (count($fileContentArray) > $maxLinesCount) {
+                        $fileContentArray = array_slice($fileContentArray, -$maxLinesCount);
+                    }
+
+                } else {
+                    $fileContentArray = array('File not found' . PHP_EOL);
+                }
+
+                $logs .= $fileName . PHP_EOL . implode('', $fileContentArray) . $logsSeparator;
+            }
+
+            $form['report']['report']['#value'] = stripslashes($report . PHP_EOL . $logs);
+
+            $form['report']['report']['#value'] = $form['report']['report']['#value'] . PHP_EOL . ':' . strlen($form['report']['report']['#value']);
+        }
+
+        $form['report']['user_note'] = array(
+            '#type' => 'textarea',
+            '#title' => st('Additional comments (optional)'),
+        );
+
+        $form['actions']['report'] = array(
+            '#type' => 'submit',
+            '#value' => st('Send report'),
+            '#attributes' => $buttonCSS,
+        );
+    }
+
+    $form['actions']['tryagain'] = array(
+        '#type' => 'submit',
+        '#value' => st('Try again'),
+        '#attributes' => $buttonCSS,
+    );
+
+    $jsCode =<<<OUT
+
+jQuery(document).ready(function() {
+  
+  var target = null;
+
+  jQuery('#litecommerce-install-failed-report-form input[type=submit]').click(function(event) {
+    target = this;
+  });
+
+  jQuery('#litecommerce-install-failed-report-form').submit(function() {
+
+    var isSendReportButtonExists = (jQuery('#litecommerce-install-failed-report-form input:submit[value="Send report"]').length > 0);
+
+    if (null == target && true == isSendReportButtonExists) {
+        target = jQuery('#litecommerce-install-failed-report-form input:submit[value="Send report"]');
+    }
+
+    if ('Send report' == jQuery(target).val()) {
+
+        var dataArr = {
+            target: 'customer_info',
+            action: 'install_feedback_report',
+            product_type: 'LC3',
+            user_email: jQuery('#litecommerce-install-failed-report-form input[name="user_email"]').val(),
+            report: jQuery('#litecommerce-install-failed-report-form textarea[name="report"]').val(),
+            user_note: jQuery('#litecommerce-install-failed-report-form textarea[name="user_note"]').val()
+        };
+
+        jQuery.ajax({
+            type: 'POST',
+            url: 'https://secure.qtmsoft.com/customer.php',
+            data: dataArr,
+        });
+
+    }
+
+    if (true == isSendReportButtonExists) {
+        jQuery('#litecommerce-install-failed-report-form input[name="user_email"]').attr('disabled', 'disabled');
+        jQuery('#litecommerce-install-failed-report-form textarea[name="report"]').attr('disabled', 'disabled');
+        jQuery('#litecommerce-install-failed-report-form textarea[name="user_note"]').attr('disabled', 'disabled');
+        jQuery('#litecommerce-install-failed-report-form input[name="target"]').attr('disabled', 'disabled');
+        jQuery('#litecommerce-install-failed-report-form input[name="action"]').attr('disabled', 'disabled');
+        jQuery('#litecommerce-install-failed-report-form input[name="product_type"]').attr('disabled', 'disabled');
+    }
+
+    return true;
+
+  });
+});
+
+OUT;
+    drupal_add_js($jsCode, 'inline');
+
+    return $form;
+}
+
+/**
+ * Processes the 'Send report' form
+ *
+ * @param array $form       Form description
+ * @param array $form_state Form state
+ *
+ * @hook   form_FORM_ID_submit
+ * @return void
+ * @since  1.0.0
+ */
+function litecommerce_install_failed_report_form_submit(array $form, array &$form_state) {
+
+    global $install_state;
+
+    if ($form_state['values']['tryagain'] == $form_state['values']['op']) {
+        // 'Try again' button click processing
+
+        variable_set('install_task', 'install_system_module');
+        variable_del('install_current_batch');
+        variable_del('report_sent');
+        variable_del('lc_install_failed');
+
+        x_install_log('Retry after LiteCommerce installation failure');
+
+    } else {
+        // 'Send report' button click processing
+
+        variable_set('report_sent', true);
+        drupal_set_message(st('Report has been successfully sent. Thank you for your feedback.'));
+        x_install_log('Report is sent');
+    }
+
+    install_goto(install_redirect_url($install_state));
 }
 
 /**
@@ -768,7 +1019,7 @@ function _litecommerce_get_setup_params() {
         if (empty($params) && !empty($db_params)) {
             $params = $db_params;
 
-            $url = parse_url(LCConnector_Install::getDrupalBaseURL() . '/modules/lc_connector/litecommerce');
+            $url = parse_url(LCConnector_Install::getDrupalBaseURL() . '/litecommerce');
             $params['xlite_http_host'] = $url['host'] . (empty($url['port']) ? '' : (':' . $url['port']));
             $params['xlite_web_dir'] = $url['path'];
         }
