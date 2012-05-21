@@ -164,7 +164,30 @@ function _litecommerce_test_blocks($default_theme) {
             ),
         ),
 
-
+        // onSale block
+        array(
+            'bid' => 15,
+            'block_custom' => array(
+                'info' => 'On sale products',
+                'lc_class' => '\\XLite\\Module\\CDev\\Sale\\View\\SaleBlock',
+            ),
+            'block_lc_widget_settings' => array(
+                'displayMode' => 'grid',
+                'gridColumns' => 5,
+                'iconHeight' => '160',
+                'iconWidth' => '160',
+                'showDisplayModeSelector' => 0,
+                'showItemsPerPageSelector' => 0,
+                'showSortBySelector' => 0,
+                'itemsPerPage' => 5,
+                'widgetType' => 'center',
+            ),
+            'block' => array(
+                'weight' => -10,
+                'region' => 'content',
+                'title'  => 'On sale block',
+            ),
+        ),
     );
 
     $block_custom_default_values = array(
