@@ -29,6 +29,7 @@ function _litecommerce_common_settings() {
 
     if (!defined('DRUPAL_CMS_INSTALL_MODE')) {
         define('DRUPAL_CMS_INSTALL_MODE', 1);
+        define('CMS_INSTALL_SETTINGS_CALLBACK', '_litecommerce_settings_callback');
     }
 
     /**
@@ -353,7 +354,7 @@ function litecommerce_install_settings_form_validate(array $form, array &$form_s
 
     $drupal_prefix = trim($form_state['values']['mysql']['db_prefix']);
 
-    $xlite_prefix = get_xlite_tables_prefix();
+    $xlite_prefix = get_db_tables_prefix();
 
     if ($drupal_prefix == $xlite_prefix) {
         form_set_error('mysql][db_prefix', st('A prefix for the Drupal tables cannot be :db_prefix as it is reserved for the LiteCommerce tables.', array(':db_prefix' => $xlite_prefix)));
@@ -541,6 +542,10 @@ function litecommerce_software_install(array &$install_state) {
  * @since  1.0.0
  */
 function _litecommerce_software_install_batch(array $step, &$context) {
+
+    if (!defined('XCN_ADMIN_SCRIPT')) {
+        define('XCN_ADMIN_SCRIPT', true);
+    }
 
     // Function name
     $function = $step['function'];
@@ -1061,4 +1066,28 @@ function _litecommerce_install_increase_memory_limit($new_value) {
     if (intval($new_value) > intval($current_value)) {
         @ini_set('memory_limit', sprintf('%dM', $new_value));
     }
+}
+
+/**
+ * Litecommerce settings callback
+ *
+ * @param array $settings Settings
+ *
+ * @return array
+ * @since  1.0.0
+ */
+function _litecommerce_settings_callback(array $settings) {
+
+    $settings['enable_modules']['CDev'] = array_diff(
+        $settings['enable_modules']['CDev'],
+        array('ContactUs', 'SimpleCMS', 'SocialLogin')
+    );
+
+    $settings['enable_modules']['XC'] = array_diff(
+        $settings['enable_modules']['XC'],
+        array('ThemeTweaker')
+    );
+
+
+    return $settings;
 }
